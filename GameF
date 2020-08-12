@@ -1,0 +1,167 @@
+public class GameField extends JPanel implements ActionListener {
+//переменные с которыми мы будем работать и в последствие играть
+    private final int size = 600;
+    private final int DOT_SIZE = 16; //размер пикселей одной ячейки
+    private final int ALL_DOTS = 400; //сколько всего ячеек
+    private Image dot; // картинка змеи
+    private Image apple; //картинка яблока
+    private int APPLE_X; //раполажение яблока
+    private int APPLE_Y;
+    private int[] x = new int[ALL_DOTS]; //массивы для хранения
+    private int[] y = new int[ALL_DOTS];
+    private int dots; //изначальное положение змеи
+    private Timer timer; // таймер
+    // кнопки контрооля. по дефолту у булеан фолс. но на всякий случай прописал:)
+    private boolean left = false;
+    private boolean right = true;
+    private boolean up = false;
+    private boolean down = false;
+    private boolean inGame = true; // остаёмся ли мы в игре
+
+    public GameField(){
+        setBackground(Color.PINK); // цвет фона
+        loadImage();
+        intGame();
+        addKeyListener(new FieldKeyListener());
+        setFocusable(true);
+    }
+
+
+    //методы для инициализации запуска
+    public void intGame() {
+        dots = 3;
+        for (int i = 0; i < dots; i++) {
+            x[i] = 48 - i*DOT_SIZE; //Этим циклом мы указали, где именно появится в нашем окошке змейка. 48 потому что оно кратно 16.
+            y[i] = 48;
+        }
+        //создаём и запускаем таймер
+        timer = new Timer(250, this);
+        timer.start();
+        createApple();
+    }
+
+        public void createApple(){
+          APPLE_X = new Random().nextInt(20)*DOT_SIZE;
+          APPLE_Y = new Random().nextInt(20)*DOT_SIZE;
+
+        }
+
+
+        //перерисовываем графику
+
+    // метод для загручки иконок
+    public  void loadImage(){
+        ImageIcon iiA = new ImageIcon("apple.jpg");
+        apple = iiA.getImage();
+        ImageIcon iiS = new ImageIcon("sharp.jpg");
+        dot = iiS.getImage();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        //если мы в игры, то прорисовываем яблоко
+        if(inGame){
+            g.drawImage(apple, APPLE_X, APPLE_Y, this);
+            //прорисовываем змейку
+            for (int i = 0; i <dots; i++){
+                g.drawImage(dot, x[i], y[i], this);
+            }
+
+        }else{
+            String str = "Game Over";
+            //Font f = new Font("Arial",14,Font.BOLD);
+            g.setColor(Color.white);
+            // g.setFont(f);
+            g.drawString(str,125,size/2);
+        }
+    }
+
+
+    //метод перемещения
+
+    public void move(){
+        for(int i = dots; i > 0; i--){
+            x[i] = x[i-1];
+            y[i] = y[i-1];
+        }
+        if(left){
+            x[0] -= DOT_SIZE;
+        } if(right){
+            x[0] += DOT_SIZE;
+        } if(up){
+            y[0] -= DOT_SIZE;
+        } if(down){
+            y[0] += DOT_SIZE;
+        }
+    }
+
+
+    public void checkApple(){
+        if(x[0] == APPLE_X && y[0] == APPLE_Y){
+            dots++;
+            createApple();
+
+        }
+    }
+    // не столкнулся ли я сам с собой или с бордюрами
+    public void checkCollisions(){
+        for(int i = dots; i >0; i--) {
+            if (i > 4 && x[0] == x[i] && y[0] == y[i]){
+                inGame = false;
+            }
+        }
+        if(x[0]>size){
+            inGame = false;
+        }
+        if(x[0]<0){
+            inGame = false;
+        }
+        if(y[0]>size){
+            inGame = false;
+        }
+        if(y[0]<0){
+            inGame = false;
+        }
+        }
+
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if(inGame){
+            checkApple();
+            checkCollisions();
+            move();
+        }
+        repaint();
+    }
+
+    class FieldKeyListener extends KeyAdapter{
+        @Override
+        public void keyPressed(KeyEvent e) {
+            super.keyPressed(e);
+            int key = e.getKeyCode();
+            if(key == KeyEvent.VK_LEFT && !right){
+                left = true;
+                up = false;
+                down = false;
+            }
+            if(key == KeyEvent.VK_RIGHT && !left){
+                right = true;
+                up = false;
+                down = false;
+            }
+
+            if(key == KeyEvent.VK_UP && !down){
+                right = false;
+                up = true;
+                left = false;
+            }
+            if(key == KeyEvent.VK_DOWN && !up){
+                right = false;
+                down = true;
+                left = false;
+            }
+        }
+    }
+}

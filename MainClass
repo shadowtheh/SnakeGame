@@ -1,0 +1,23 @@
+package sample;
+import javax.swing.*;
+
+//Jframe класс для создания окон/графического интерфейса
+
+public class Main extends JFrame {
+
+    public Main(){
+        setTitle("Змейка");
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setSize(670, 690);
+        add(new GameField());
+        setLocation(400, 400);
+        setVisible(true);
+    }
+
+    public static void main(String[] args) {
+
+        Main sg = new Main();
+
+
+    }
+}
